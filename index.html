@@ -83,6 +83,7 @@
     var ans = [];
     window.onload = function () {
       // 调整屏幕宽度
+      
       getDevice()
       var arr = document.getElementsByClassName('btn_normal btn');
       for (var i = 0; i < arr.length; i++) {
@@ -109,7 +110,14 @@
         }
       }
     }
-
+	function copy2clipboard(text){
+		const tmp_input = document.createElement('input');
+		document.body.appendChild(tmp_input);
+		tmp_input.setAttribute('value', text);
+		tmp_input.select();
+		document.execCommand('copy');
+		document.body.removeChild(tmp_input);
+	}
     function redrawTable() {
       var tbody = document.getElementById('tbMain');
       var trs = document.getElementsByTagName("tr");
@@ -124,7 +132,35 @@
 
     function getDataRow(data) {
       var row = document.createElement('tr');
-
+	  row.onclick = function(e){
+		var text = tags[0];
+	    for(var i=1;i<tags.length;i++){
+		  text+="\t"+tags[i];
+		}
+		//text += `\t=IF(E27="","空",LEFT(E27,1)&LEFT(F27,1)&LEFT(G27,1)&LEFT(H27,1)&LEFT(I27,1))\t=IF(J27="空","",COUNTIF($J$2:$J$2003,J27))\t=IF(J27="空","",COUNTIF($J$2:$J$2003,J27)/COUNTIFS($J$2:$J$2003,"<>"&"空"))`
+		//text += '\t'
+		var selected_tags = this.children[0].innerHTML.split(",");
+		for(var i=0;i<3;i++){
+			if (i < selected_tags.length){
+				text += "\t"+selected_tags[i];
+			}else{
+				text += "\t";
+			}
+		}
+		var td = this.children[1].children;
+		var ssr_cnt = 0;
+		var isNexists = false;
+		for (var i=0;i<td.length;i++){
+			if (td[i].innerHTML.indexOf("2☆")>-1){
+				ssr_cnt += 1
+			}else if(td[i].innerHTML.indexOf("0☆")>-1){
+				isNexists = true;
+			}
+		}
+		text += "\t" + (isNexists? "0星污染" : "");
+		text += "\t="+ssr_cnt+"/"+td.length;
+		copy2clipboard(text);
+	  }
       var tagCell = document.createElement('td');
       tagCell.innerHTML = data[0].tags;
       row.appendChild(tagCell);
